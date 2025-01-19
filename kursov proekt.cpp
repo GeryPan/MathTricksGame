@@ -1,16 +1,21 @@
-// kursov proekt.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <random>
 #include <windows.h> 
 #include <cstdlib>  
 #include <ctime>//for time() function
+#include <fstream> // for file operations
+
 using namespace std;
-char table[100][100];
-int visit_length[2000];
-int visit_width[2000];
-char allowed_moves[] = { 'A', 'S' , 'D' , 'W' , 'Q' , 'E' , 'Z' , 'X' };
+
+#define MAX_LENGTH 200
+#define MAX_WIDTH 200
+
+
+int visit_length[MAX_LENGTH] = { 0 };
+int visit_width[MAX_WIDTH] = { 0 };
+char table[MAX_LENGTH][MAX_WIDTH * 2] = {};
+char allowed_moves[] = { 'A', 'S' , 'D' , 'W' , 'Q' , 'E' , 'Z' , 'X' , 'a', 's','d','w','q','e','z','x' };
+
 void setColor(int text, int background)
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -19,7 +24,7 @@ void setColor(int text, int background)
 
 bool allowed_move(char move)
 {
-    for (int i = 0; i <= 8; i++)
+    for (int i = 0; i <= 16; i++)
     {
         if (allowed_moves[i] == move) return true;
     }
@@ -39,6 +44,7 @@ void make_the_table(int l, int w)
 {
     srand(static_cast<unsigned>(time(0)));
     char signs[] = { '+', '-', 'x','/'};
+
     for (int i = 0; i < l; i++)
     {
         for (int j = 0; j < (w + w); j += 2)
@@ -74,6 +80,7 @@ void make_the_table(int l, int w)
                 table[i][j + 1] = rand() % 9 + 1 + '0';
                 table[i][j] = signs[rand() % 3 + 1];
             }
+
         }
     }
     table[0][0] = ' ';
@@ -85,63 +92,55 @@ void make_the_table(int l, int w)
 int relocation_l(char move, int move_l)
 {
     int i = move_l;
+    move = tolower(move);
 
-    if (move == 'W')
+    switch (move)
     {
-        i--;
+        case 'w':  
+        case 'q':
+        case 'e': 
+            i--; 
+            break;
+
+        case 's':
+        case 'z':
+        case 'x':
+            i++;
+            break;
+
+        default:
+            break;
     }
-    else  if (move == 'S')
-    {
-        i++;
-    }
-    else  if (move == 'Q')
-    {
-        i--;
-    }
-    else  if (move == 'E')
-    {
-        i--;
-    }
-    else  if (move == 'Z')
-    {
-        i++;
-    }
-    else  if (move == 'X')
-    {
-        i++;
-    }
+
     return i;
 }
+
 
 int relocation_w(char move, int move_w)
 {
     int j = move_w;
-    if (move == 'A')
+    move = tolower(move);
+
+    switch (move)
     {
-        j -= 2;
+        case 'a':  
+        case 'q': 
+        case 'z':  
+            j -= 2;  
+            break;
+
+        case 'd':  
+        case 'e':  
+        case 'x':  
+            j += 2;  
+            break;
+        default:
+            break;
     }
-    else  if (move == 'D')
-    {
-        j += 2;
-    }
-    else  if (move == 'Q')
-    {
-        j -= 2;
-    }
-    else  if (move == 'E')
-    {
-        j += 2;
-    }
-    else  if (move == 'Z')
-    {
-        j -= 2;
-    }
-    else  if (move == 'X')
-    {
-        j += 2;
-    }
+
     return j;
 }
+
 
 bool move_check(int l, int w, char move, int move_l, int move_w)
 {
@@ -168,7 +167,7 @@ void visited_place(int i, int move_l, int move_w)
     visit_width[i] = move_w;
 }
 
-bool can_you_step_there(int l, int w,int i, int move_l, int move_w, char move)
+bool check_can_you_step_there(int l, int w,int i, int move_l, int move_w, char move)
 {
     int j = i-1;
     if (j <= 2) return true;
@@ -182,6 +181,7 @@ bool can_you_step_there(int l, int w,int i, int move_l, int move_w, char move)
     }
     return true;
 }
+
 bool general_check(int length, int width, int i, int l, int w)
 {
     int j = i - 1;
@@ -199,26 +199,27 @@ bool general_check(int length, int width, int i, int l, int w)
     }
     else return true;
 }
+
 bool stop_the_game(int length, int width, int i, int current_l, int current_w)
 {
-    char possible_moves[] = { 'A', 'D', 'W', 'S', 'Q', 'E', 'Z', 'X' };
-
     for (int k = 0; k < 8; k++) {
-        char move = possible_moves[k];
+        char move = allowed_moves[k];
 
         if (move_check(length, width, move, current_l, current_w) &&
-            can_you_step_there(length, width, i, current_l, current_w, move)) {
+            check_can_you_step_there(length, width, i, current_l, current_w, move)) {
             return true; 
         }
     }
 
     return false; 
 }
-int winner(int points1, int points2)
+
+int check_winner(int points1, int points2)
 {
     if (points1 > points2) return 1;
     else return 2;
 }
+
 void process_player_move(int l, int w, int &points,int &move1l, int &move1w, int i)
 {
     char move;
@@ -228,57 +229,23 @@ void process_player_move(int l, int w, int &points,int &move1l, int &move1w, int
         cout << "Invalid move, try again." << endl;
         process_player_move(l, w, points, move1l, move1w, i);
     }
-
-        else if (move_check(l, w, move, move1l, move1w) == false)
-        {
-            cout << "You can't leave the field." << endl << "Enter allowed move" << endl;
-            process_player_move(l, w, points, move1l, move1w, i);
-        }
-
-        else if (can_you_step_there(l, w, i, move1l, move1w, move) == false)
-        {
-            cout << "You can't step on a cage which has already been passed once." << endl << "Enter allowed move" << endl;
-            process_player_move(l, w, points, move1l, move1w, i);
-        }
-
-        else 
-        {
-            move1l = relocation_l(move, move1l);
-            move1w = relocation_w(move, move1w);
-            visited_place(i, move1l, move1w);
-            points = new_points(points, move1l, move1w);
-        }
-}
-
-void player2(int l, int w, int &points, int &move2l, int &move2w, int i)
-{
-        char move;
-        cin >> move;
-        if (allowed_move(move) == false)
-        {
-            cout << "Invalid move, try again." << endl;
-            player2(l, w, points, move2l, move2w, i);
-        }
-
-        else if (move_check(l, w, move, move2l, move2w) == false)
-        {
-            cout << "You can't leave the field." << endl << "Enter allowed move" << endl;
-            player2(l, w, points, move2l, move2w, i);
-        }
-
-        else if (can_you_step_there(l, w, i, move2l, move2w, move) == false)
-        {
-            cout << "You can't step on a cage which has already been passed once." << endl << "Enter allowed move" << endl;
-            player2(l, w, points, move2l, move2w, i);
-        }
-
-        else
-        {
-            move2l = relocation_l(move, move2l);
-            move2w = relocation_w(move, move2w);
-            visited_place(i, move2l , move2w);
-            points = new_points(points, move2l, move2w);
-        }
+    else if (move_check(l, w, move, move1l, move1w) == false)
+    {
+        cout << "You can't leave the field." << endl << "Enter allowed move" << endl;
+        process_player_move(l, w, points, move1l, move1w, i);
+    }
+    else if (check_can_you_step_there(l, w, i, move1l, move1w, move) == false)
+    {
+        cout << "You can't step on a cage which has already been passed once." << endl << "Enter allowed move" << endl;
+        process_player_move(l, w, points, move1l, move1w, i);
+    }
+    else 
+    {
+        move1l = relocation_l(move, move1l);
+        move1w = relocation_w(move, move1w);
+        visited_place(i, move1l, move1w);
+        points = new_points(points, move1l, move1w);
+    }
 }
 
 bool has_it_been_steped_BY_BLUE(int l, int w, int i)
@@ -333,12 +300,11 @@ void print_table(int l, int w, int k, int place_l_1, int place_w_1, int place_l_
                 setColor(22, 25);
                 cout << table[i][j - 1] << table[i][j];
             }
-            else
-                if (i == place_l_2 && j == place_w_2)
-                {
-                    setColor(38, 34);
-                    cout << table[i][j - 1] << table[i][j];
-                }
+            else if (i == place_l_2 && j == place_w_2)
+            {
+                setColor(38, 34);
+                cout << table[i][j - 1] << table[i][j];
+            }
             else if (has_it_been_steped_BY_BLUE(i, j, k) == false)
             {
                 setColor(15, 25);
@@ -354,34 +320,150 @@ void print_table(int l, int w, int k, int place_l_1, int place_w_1, int place_l_
                 setColor(15, 0);
                 cout << table[i][j - 1] << table[i][j];
             }
-                cout << "\t";
-                setColor(7, 0);
+
+            cout << "\t";
+            setColor(7, 0);
         }
         cout << endl;
 
     }
 }
 
+//  Function for writing the state of a game in file 
+//TODO fix it 
+void serialize_game(const string& filename, int length, int width, int points_1, int points_2, int l_start1, int w_start1, int l_start2, int w_start2) {
+    ofstream file(filename, ios::binary);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file." << endl;
+        return;
+    }
+
+    file.write((char*)&length, sizeof(length));
+    file.write((char*)&width, sizeof(width));
+    file.write((char*)&points_1, sizeof(points_1));
+    file.write((char*)&points_2, sizeof(points_2));
+    file.write((char*)&l_start1, sizeof(l_start1));
+    file.write((char*)&w_start1, sizeof(w_start1));
+    file.write((char*)&l_start2, sizeof(l_start2));
+    file.write((char*)&w_start2, sizeof(w_start2));
+
+
+    for (int i = 0; i < length; i++) {
+        file.write((char*)&visit_length[i], sizeof(int));
+    }
+
+    for (int i = 0; i < width; i++) {
+        file.write((char*)&visit_width[i], sizeof(int));
+    }
+
+    for (int i = 0; i < length; i++) {
+        file.write((char*)table[i], width * 2 * sizeof(char)); 
+    }
+
+    file.close();
+    cout << "Game state successfully saved to " << filename << endl;
+}
+
+
+// Function for reading the state of a game from file 
+//TODO fix it 
+void deserialize_game(const string& filename, int& length, int& width, int& points_1, int& points_2, int& l_start1, int& w_start1, int& l_start2, int& w_start2) {
+    ifstream file(filename, ios::binary);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file." << endl;
+        return;
+    }
+
+    file.read((char*)&length, sizeof(length));
+    file.read((char*)&width, sizeof(width));
+    file.read((char*)&points_1, sizeof(points_1));
+    file.read((char*)&points_2, sizeof(points_2));
+    file.read((char*)&l_start1, sizeof(l_start1));
+    file.read((char*)&w_start1, sizeof(w_start1));
+    file.read((char*)&l_start2, sizeof(l_start2));
+    file.read((char*)&w_start2, sizeof(w_start2));
+
+    cout << typeid(length).name() << endl;
+
+    for (int i = 0; i < length; i++) {
+        file.read((char*)&visit_length[i], sizeof(int));
+    }
+
+    for (int i = 0; i < width; i++) {
+        file.read((char*)&visit_width[i], sizeof(int));
+    }
+
+    for (int i = 0; i < length; i++) {
+        for (int j = 0; j < width * 2; j++) {
+            file.read((char*)&table[i][j], sizeof(char));
+        }
+    }
+
+    file.close();
+    cout << "Game state successfully loaded from " << filename << endl;
+}
+
+
 int main()
 {
     int length, width;
-    cout << "Enter the game dimensions (two positive numbers defining the length and width of the playing field). ";
-    cin >> length >> width;
-    while (size_check(length, width) == false)
-    {
-        cout << "The minimum game size is 4x4! ";
-        cin >> length >> width;
-    }
-    int l_start1 = 0, w_start1 = 1, l_start2 = length-1, w_start2 = 2*width-1;
+    int choice_number;
+    int l_start1 = 0, w_start1 = 1, l_start2 = 0, w_start2 = 0;
     int points_1 = 0, points_2 = 0;
 
-    cout << "A-left, D-right, W-up, S-down, E-top right diagonal, Q-top left diagonal, X-bottom right diagonal, Z-bottom left diagonal" << endl;
 
-    make_the_table(length, width);
+    cout << "Welcome to the game!" << endl;
+    cout << "1. Start new game" << endl;
+    cout << "2. Load saved game" << endl;
+
+    cin >> choice_number;
+
+    if (choice_number == 2) {
+        deserialize_game("savegame.bin", length, width, points_1, points_2, l_start1, w_start1, l_start2, w_start2);
+    }
+    else {
+        cout << "Enter the game dimensions (two positive numbers defining the length and width of the playing field). " << endl;
+        cout << "Length: ";
+        cin >> length;
+        cout << "Width: ";
+        cin >> width;
+
+        l_start1 = 0, w_start1 = 1;
+
+        l_start2 = length - 1;
+        w_start2 = 2 * width - 1;
+        while (size_check(length, width) == false)
+        {
+            cout << "The minimum game size is 4x4! ";
+            cin >> length >> width;
+        }
+
+        cout << "A-left, D-right, W-up, S-down, E-top right diagonal, Q-top left diagonal, X-bottom right diagonal, Z-bottom left diagonal" << endl;
+
+        make_the_table(length, width);
+    }
+
     for (int i = 2; i < (length * width); i++)
     {
-        cout << "Enter where you want to move." << endl;
+        system("cls");
+        cout << "Allowed moves" << endl;
+        cout << "A-left, D-right, W-up, S-down, E-top right diagonal, Q-top left diagonal, X-bottom right diagonal, Z-bottom left diagonal" << endl;
+        cout << "Blue=" << points_1 << " VS Green=" << points_2 << endl;
         print_table(length, width, i, l_start1, w_start1, l_start2, w_start2);
+
+        char choice;
+        cout << "Type 'Y' or 'y' to save the game: ";
+        cin >> choice;
+
+        if (choice == 'Y' || choice == 'y') {
+            serialize_game("savegame.bin", length, width, points_1, points_2, l_start1, w_start1, l_start2, w_start2);
+            cout << "Game state saved successfully!" << endl;
+            i--;  // this prevent missing a move 
+            system("pause");
+            continue; // continue with current move
+        }
+
+        cout << "Enter where you want to move." << endl;
         if (i % 2 == 0)
         {
 
@@ -408,22 +490,12 @@ int main()
                 process_player_move(length, width, points_2, l_start2, w_start2, i);
             }
         }
-        cout << "Blue=" << points_1 << " VS Green=" << points_2 << endl;
+     
+        
     }
     if (points_1 == points_2) cout << "Equal";
-    cout << "The winner is Player " << winner(points_1, points_2);
-} //Ostana ti da SE CHISTI KONZOLATA
-        
+    cout << "The winner is Player " << check_winner(points_1, points_2);
 
+    return 0;   
+}
 
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
