@@ -32,7 +32,7 @@ bool allowed_move(char move)
 }
 
 bool size_check(int l, int w)
-{ 
+{
     if (l < 4 || w < 4)
     {
         return false;
@@ -43,7 +43,7 @@ bool size_check(int l, int w)
 void make_the_table(int l, int w)
 {
     srand(static_cast<unsigned>(time(0)));
-    char signs[] = { '+', '-', 'x','/'};
+    char signs[] = { '+', '-', 'x','/' };
 
     for (int i = 0; i < l; i++)
     {
@@ -56,27 +56,27 @@ void make_the_table(int l, int w)
                 table[i][j + 1] = '0';
             }
             else if (operation < 9)
-            { 
+            {
                 table[i][j + 1] = '2';
                 table[i][j] = 'x';
             }
             else if (operation < 13)
-            {  
+            {
                 table[i][j + 1] = '2';
                 table[i][j] = '/';
             }
-            else if(operation < 35)
-            {  
+            else if (operation < 35)
+            {
                 table[i][j + 1] = rand() % 9 + 1 + '0';
                 table[i][j] = signs[rand() % 1];
             }
             else if (operation < 40)
-            {  
+            {
                 table[i][j + 1] = rand() % 9 + 1 + '0';
-                table[i][j] = signs[rand() % 1+1];
+                table[i][j] = signs[rand() % 1 + 1];
             }
             else
-            { 
+            {
                 table[i][j + 1] = rand() % 9 + 1 + '0';
                 table[i][j] = signs[rand() % 3 + 1];
             }
@@ -96,20 +96,20 @@ int relocation_l(char move, int move_l)
 
     switch (move)
     {
-        case 'w':  
-        case 'q':
-        case 'e': 
-            i--; 
-            break;
+    case 'w':
+    case 'q':
+    case 'e':
+        i--;
+        break;
 
-        case 's':
-        case 'z':
-        case 'x':
-            i++;
-            break;
+    case 's':
+    case 'z':
+    case 'x':
+        i++;
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return i;
@@ -123,19 +123,19 @@ int relocation_w(char move, int move_w)
 
     switch (move)
     {
-        case 'a':  
-        case 'q': 
-        case 'z':  
-            j -= 2;  
-            break;
+    case 'a':
+    case 'q':
+    case 'z':
+        j -= 2;
+        break;
 
-        case 'd':  
-        case 'e':  
-        case 'x':  
-            j += 2;  
-            break;
-        default:
-            break;
+    case 'd':
+    case 'e':
+    case 'x':
+        j += 2;
+        break;
+    default:
+        break;
     }
 
     return j;
@@ -144,7 +144,7 @@ int relocation_w(char move, int move_w)
 
 bool move_check(int l, int w, char move, int move_l, int move_w)
 {
-    if (relocation_l(move, move_l) < 0 || relocation_l(move, move_l) >= l || relocation_w(move, move_w) < 0 || relocation_w(move, move_w) >= (w+w))
+    if (relocation_l(move, move_l) < 0 || relocation_l(move, move_l) >= l || relocation_w(move, move_w) < 0 || relocation_w(move, move_w) >= (w + w))
     {
         return false;
     }
@@ -167,11 +167,11 @@ void visited_place(int i, int move_l, int move_w)
     visit_width[i] = move_w;
 }
 
-bool check_can_you_step_there(int l, int w,int i, int move_l, int move_w, char move)
+bool check_can_you_step_there(int l, int w, int i, int move_l, int move_w, char move)
 {
-    int j = i-1;
+    int j = i - 1;
     if (j <= 2) return true;
-    while (j>= 0)
+    while (j >= 0)
     {
         if (visit_length[j] == relocation_l(move, move_l) && visit_width[j] == relocation_w(move, move_w))
         {
@@ -207,11 +207,11 @@ bool stop_the_game(int length, int width, int i, int current_l, int current_w)
 
         if (move_check(length, width, move, current_l, current_w) &&
             check_can_you_step_there(length, width, i, current_l, current_w, move)) {
-            return true; 
+            return false;
         }
     }
 
-    return false; 
+    return true;
 }
 
 int check_winner(int points1, int points2)
@@ -220,10 +220,10 @@ int check_winner(int points1, int points2)
     else return 2;
 }
 
-void process_player_move(int l, int w, int &points,int &move1l, int &move1w, int i)
+void process_player_move(int l, int w, int& points, int& move1l, int& move1w, int i)
 {
     char move;
-    cin >> move;
+    std::cin >> move;
     if (allowed_move(move) == false)
     {
         cout << "Invalid move, try again." << endl;
@@ -239,7 +239,7 @@ void process_player_move(int l, int w, int &points,int &move1l, int &move1w, int
         cout << "You can't step on a cage which has already been passed once." << endl << "Enter allowed move" << endl;
         process_player_move(l, w, points, move1l, move1w, i);
     }
-    else 
+    else
     {
         move1l = relocation_l(move, move1l);
         move1w = relocation_w(move, move1w);
@@ -290,10 +290,10 @@ void print_table(int l, int w, int k, int place_l_1, int place_w_1, int place_l_
         cout << " " << cols << "\t";
     }
     cout << endl << endl;
-    for (int i = 0; i < l; i++) 
+    for (int i = 0; i < l; i++)
     {
         cout << i << "|" << "\t";
-        for (int j = 1; j < (w + w); j+=2)
+        for (int j = 1; j < (w + w); j += 2)
         {
             if (i == place_l_1 && j == place_w_1)
             {
@@ -308,7 +308,7 @@ void print_table(int l, int w, int k, int place_l_1, int place_w_1, int place_l_
             else if (has_it_been_steped_BY_BLUE(i, j, k) == false)
             {
                 setColor(15, 25);
-                cout << table[i][j-1] << table[i][j];
+                cout << table[i][j - 1] << table[i][j];
             }
             else if (has_it_been_steped_BY_GREEN(i, j, k) == false)
             {
@@ -331,7 +331,7 @@ void print_table(int l, int w, int k, int place_l_1, int place_w_1, int place_l_
 
 //  Function for writing the state of a game in file 
 //TODO fix it 
-void serialize_game(const string& filename, int length, int width, int points_1, int points_2, int l_start1, int w_start1, int l_start2, int w_start2) {
+void serialize_game(const string& filename, int length, int width, int points_1, int points_2, int l_start1, int w_start1, int l_start2, int w_start2, int index) {
     ofstream file(filename, ios::binary);
     if (!file.is_open()) {
         cerr << "Error: Unable to open file." << endl;
@@ -357,7 +357,9 @@ void serialize_game(const string& filename, int length, int width, int points_1,
     }
 
     for (int i = 0; i < length; i++) {
-        file.write((char*)table[i], width * 2 * sizeof(char)); 
+        for (int j = 0; j < width * 2; j++) {
+            file.write((char*)&table[i][j], sizeof(char));
+        }
     }
 
     file.close();
@@ -367,10 +369,10 @@ void serialize_game(const string& filename, int length, int width, int points_1,
 
 // Function for reading the state of a game from file 
 //TODO fix it 
-void deserialize_game(const string& filename, int& length, int& width, int& points_1, int& points_2, int& l_start1, int& w_start1, int& l_start2, int& w_start2) {
+void deserialize_game(const string& filename, int& length, int& width, int& points_1, int& points_2, int& l_start1, int& w_start1, int& l_start2, int& w_start2, int index) {
     ifstream file(filename, ios::binary);
     if (!file.is_open()) {
-        cerr << "Error: Unable to open file." << endl;
+        cout << "Error: Unable to open file." << endl;
         return;
     }
 
@@ -382,8 +384,6 @@ void deserialize_game(const string& filename, int& length, int& width, int& poin
     file.read((char*)&w_start1, sizeof(w_start1));
     file.read((char*)&l_start2, sizeof(l_start2));
     file.read((char*)&w_start2, sizeof(w_start2));
-
-    cout << typeid(length).name() << endl;
 
     for (int i = 0; i < length; i++) {
         file.read((char*)&visit_length[i], sizeof(int));
@@ -404,12 +404,12 @@ void deserialize_game(const string& filename, int& length, int& width, int& poin
 }
 
 
-int main()
-{
+int main(){
     int length, width;
     int choice_number;
     int l_start1 = 0, w_start1 = 1, l_start2 = 0, w_start2 = 0;
     int points_1 = 0, points_2 = 0;
+    int i = 2;
 
 
     cout << "Welcome to the game!" << endl;
@@ -419,7 +419,7 @@ int main()
     cin >> choice_number;
 
     if (choice_number == 2) {
-        deserialize_game("savegame.bin", length, width, points_1, points_2, l_start1, w_start1, l_start2, w_start2);
+        deserialize_game("savegame.bin", length, width, points_1, points_2, l_start1, w_start1, l_start2, w_start2, i);
     }
     else {
         cout << "Enter the game dimensions (two positive numbers defining the length and width of the playing field). " << endl;
@@ -443,9 +443,9 @@ int main()
         make_the_table(length, width);
     }
 
-    for (int i = 2; i < (length * width); i++)
+    for (; i < (length * width); i++)
     {
-        system("cls");
+        system("cls"); // clear the screen
         cout << "Allowed moves" << endl;
         cout << "A-left, D-right, W-up, S-down, E-top right diagonal, Q-top left diagonal, X-bottom right diagonal, Z-bottom left diagonal" << endl;
         cout << "Blue=" << points_1 << " VS Green=" << points_2 << endl;
@@ -456,7 +456,7 @@ int main()
         cin >> choice;
 
         if (choice == 'Y' || choice == 'y') {
-            serialize_game("savegame.bin", length, width, points_1, points_2, l_start1, w_start1, l_start2, w_start2);
+            serialize_game("savegame.bin", length, width, points_1, points_2, l_start1, w_start1, l_start2, w_start2, i);
             cout << "Game state saved successfully!" << endl;
             i--;  // this prevent missing a move 
             system("pause");
@@ -467,12 +467,12 @@ int main()
         if (i % 2 == 0)
         {
 
-            if (stop_the_game(length, width, i, l_start1, w_start1) == false)
+            if (stop_the_game(length, width, i, l_start1, w_start1))
             {
-                i = length * width;
-                
+                break;
+
             }
-            else 
+            else
             {
                 cout << "Player 1: ";
                 process_player_move(length, width, points_1, l_start1, w_start1, i);
@@ -480,22 +480,22 @@ int main()
         }
         else
         {
-            if ((length, width, i, l_start2, w_start2) == false)
+            if (stop_the_game(length, width, i, l_start2, w_start2))
             {
                 break;
             }
-            else 
+            else
             {
                 cout << "Player 2: ";
                 process_player_move(length, width, points_2, l_start2, w_start2, i);
             }
         }
-     
-        
+
+
     }
     if (points_1 == points_2) cout << "Equal";
     cout << "The winner is Player " << check_winner(points_1, points_2);
 
-    return 0;   
+    return 0;
 }
 
